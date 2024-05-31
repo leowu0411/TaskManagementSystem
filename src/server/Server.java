@@ -1,18 +1,17 @@
 package server;
-import user.*;
 import java.io.*;
 import java.net.*;
 
 
 public class Server {
 	public static final int PORT = 8000;
-	public static UserService userservice = new UserService();
 	
 	public static void main(String[] args) {
 		// open server socket
+		ServerSocket serversock = null;
 		try {
-			ServerSocket serversock = new ServerSocket(PORT);
-			System.out.println("Server end start...");
+			serversock = new ServerSocket(PORT);
+			System.out.println("Server start...");
 			
 			while(true) {
 				Socket connectionSock = serversock.accept();
@@ -23,6 +22,15 @@ public class Server {
 			
 		}catch(IOException e ) {
 			System.out.println(e.getMessage());
+		}finally {
+            // Close server socket in finally block to release resources
+            if (serversock != null) {
+                try {
+                    serversock.close();
+                } catch (IOException e) {
+                    System.out.println("Error closing server socket: " + e.getMessage());
+                }
+            }
 		}
 
 	}
