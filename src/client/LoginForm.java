@@ -23,6 +23,7 @@ public class LoginForm extends JFrame implements ActionListener {
     private Socket socket;
     private BufferedReader serverIn;
     private DataOutputStream serverOut;
+    private ConfirmWindow confirmWindow;
     
 
     public LoginForm(ClientInfo info) {
@@ -36,7 +37,8 @@ public class LoginForm extends JFrame implements ActionListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        
+        confirmWindow = new ConfirmWindow(serverOut, serverIn, info, socket);
         loginButton.addActionListener(this);
         registerButton.addActionListener(this);
         exitButton.addActionListener(this);
@@ -88,7 +90,7 @@ public class LoginForm extends JFrame implements ActionListener {
     	if(e.getSource() == loginButton) {
     		handleLogin();
     	}else if(e.getSource() == exitButton) {
-    		new ConfirmWindow().setVisible(true);
+    		this.confirmWindow.setVisible(true);
     	}else if(e.getSource() == registerButton) {
     		new RegistrationForm(serverOut, serverIn).setVisible(true);
     	}  	
@@ -107,7 +109,10 @@ public class LoginForm extends JFrame implements ActionListener {
 
             if (response.startsWith("Login Successfully!")) {
             	// Schedule session refresh task
-                if(info.getSessionId() == null) {
+            	String sessionId = response.split(" ")[2];
+                info.setSessionId(sessionId);
+                
+                if(info.getSessionId() != null) {
                 	ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(new Runnable() {
                         @Override
@@ -117,13 +122,15 @@ public class LoginForm extends JFrame implements ActionListener {
                     }, 0, 28, TimeUnit.MINUTES);
                 }
                 
-                String sessionId = response.split(" ")[2];
-                info.setSessionId(sessionId);
+                
                 statusLabel.setText("Login successful");
                 // Hide the login form and proceed to task management
+                usernameField.setText("");
+                passwordField.setText("");
+                usernameField.requestFocus();
                 setVisible(false);
-                
-                new MainFrame(serverOut, serverIn, info);
+         
+                new MainFrame(serverOut, serverIn, info, confirmWindow, this);
             } else {
                 statusLabel.setText("Login failed: " + response.split(": ")[1]);
                 // Clear the text fields and focus on username field
@@ -139,24 +146,11 @@ public class LoginForm extends JFrame implements ActionListener {
             usernameField.requestFocus();
         }
     }
+    
 
-    private synchronized void handleExit() {
-        try {
-            serverOut.writeBytes("EXIT " + info.getSessionId() + "\n");
-            System.out.println("Closing connection...");
-            socket.close();
-            
-         // Dispose of the frame and exit the application
-            dispose();
-            System.exit(0);
-        } catch (IOException e) {
-            statusLabel.setText("Error: " + e.getMessage());
-        }
-    }
-
-    private class CheckOnExit implements WindowListener{
+    private class CheckOnExit implements WindowListener{	
     	public void windowClosing(WindowEvent e) {
-    		new ConfirmWindow().setVisible(true);
+    		confirmWindow.setVisible(true);
     	}
     	
     	public void windowOpened(WindowEvent e) {}
@@ -168,23 +162,6 @@ public class LoginForm extends JFrame implements ActionListener {
     	
     }
     
-    private class ConfirmWindow extends JFrame implements ActionListener{
-		
-		public ConfirmWindow() {
-			setSize(200, 100);
-			setLayout(new BorderLayout());
-			JLabel confirmLabel = new JLabel("Are you sure you want to exit?");
-			add(confirmLabel, BorderLayout.CENTER);
-			JButton exitButton = new JButton("Yes");
-			exitButton.addActionListener(this);
-			add(exitButton, BorderLayout.SOUTH);
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			handleExit();
-			System.exit(0);
-		}
-	}
     
     private synchronized void sendSessionRefresh(DataOutputStream serverOut) {
         try {

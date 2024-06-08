@@ -1,5 +1,4 @@
 package client;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -15,13 +14,14 @@ import java.awt.Dimension;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+
 import javax.swing.*;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import parameter.*;
 
 public class MainFrame {
     public static List<Task> tasks = new ArrayList<>();
@@ -30,55 +30,34 @@ public class MainFrame {
     private static JFrame frame;
     private static JPanel taskPanel;
     private BufferedReader serverIn;
-    private DataOutputStream serverOut;
-    private ClientInfo info;
+    private static DataOutputStream serverOut;
+    private static ClientInfo info;
     private ChatForm chatForm;
     private JButton chatSystem;
-    private ServerResponse serverResponse;
+    private static ServerResponse serverResponse;
+    private ConfirmWindow confirmWindow;
+    private LoginForm loginForm;
 
-    public MainFrame(DataOutputStream serverOut, BufferedReader serverIn, ClientInfo info) {
-        createMainFrame();
+    public MainFrame(DataOutputStream serverOut, BufferedReader serverIn, ClientInfo info, ConfirmWindow confirmWindow, LoginForm loginForm) {
         this.info = info;
         this.serverIn = serverIn;
         this.serverOut = serverOut;
+        this.confirmWindow = confirmWindow;
+        this.loginForm = loginForm;
         chatForm = new ChatForm(serverOut, info);
+        createMainFrame();
+        // open server message listener
         serverResponse = new ServerResponse();
+        serverResponse.setVisible(true);
+        new Thread(new MessageHandler(serverIn, this.serverResponse, this.frame, this.loginForm)).start();
         //send data request to server...
-        InitData();
+        initRequest();
+        
         // register listener
         chatSystem.addActionListener(chatForm);
-
-        new Thread(new MessageHandler()).start();
     }
-
-    private synchronized void InitData() {
-        /*先用userId去資料庫抓取該Id底下有哪些task
-        再用迴圈去執行:
-        1. String[] task = new String[6]、taskList.add(task) 用這兩個去存取每個task的"task 名稱、status、date年、date月、date日、內容" 進到array中
-        2. taskUserIDs 用這個list去存取每一圈對應的task其共用的userid有哪些
-        */
-    	try {
-    		serverResponse.repaint();
-    		serverOut.writeBytes("USER_INIT_DATA" + info.getSessionId());
-    		String response = serverIn.readLine();
-    		serverResponse.show(response);
-    		serverResponse.repaint();
-    		try {
-    			Thread.sleep(500);
-    			
-    		}catch(InterruptedException e) {
-    			e.printStackTrace();
-    		}	
-    		serverResponse.setVisible(false);
-
-    	}catch(IOException e) {
-    		System.out.println(e.getMessage());
-    	}
-  
-    	
-    }
-
-    private static void createMainFrame() {
+    
+    private void createMainFrame() {
         // 介面建立
         frame = new JFrame();
         frame.setSize(1200, 600);
@@ -101,19 +80,6 @@ public class MainFrame {
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Disable horizontal scroll
         cp.add(scrollPane);
         
-
-        // 下面三個task是測試用，之後刪掉
-        tasks.add(new Task("task0", "Not Started", 2021, 9, 10, "Task 0 content"));
-        tasks.get(0).addUser("0");
-
-        tasks.add(new Task("task1", "Not Started", 2023, 10, 15, "Task 1 content"));
-        tasks.get(1).addUser("1");
-
-        tasks.add(new Task("task2", "Done", 2022, 5, 20, "Task 2 content"));
-        tasks.get(2).addUser("2");
-
-        tasksNumber = tasks.size();
-
 
         // 照狀態排序
         JButton sortByStatusButton = new JButton("Sort by Status");
@@ -147,24 +113,45 @@ public class MainFrame {
         createButton.setBounds(970, 85, 150, 25);
         createButton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                TaskManagement.Create(tasksNumber, frame);
-                TaskTracking.dataUpdate(tasks);
+                TaskManagement.Create(tasksNumber, frame);                
                 refreshMainFrame();
             }
         });
         cp.add(createButton);
-
-
-        // 建立介面上的 task
-        refreshMainFrame();
+        
+        JButton SaveButton = new JButton("Save");
+        SaveButton.setBounds(970, 120, 150, 25);
+        SaveButton.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+            	updateTask(serverOut, tasks);
+            }
+        });
+        cp.add(SaveButton);
+        
+        JButton LogoutButton = new JButton("Logout");
+        LogoutButton.setBounds(970, 155, 150, 25);
+        LogoutButton.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                logout(serverOut, info);
+            }
+        });
+        cp.add(LogoutButton);
+        
+        JButton ExitButton = new JButton("EXIT");
+        ExitButton.setBounds(970, 190, 150, 25);
+        ExitButton.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+            	confirmWindow.setVisible(true);
+            }
+        });
+        cp.add(ExitButton);
 
         frame.setVisible(true);
     }
 
     public static void refreshMainFrame() {
         taskPanel.removeAll();
-
-       
+        
         // Add labels row
         JPanel labelPanel = new JPanel();
         labelPanel.setPreferredSize(new Dimension(800, 24));
@@ -210,7 +197,6 @@ public class MainFrame {
             deleteButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     TaskManagement.Delete(finalI, frame);
-                    TaskTracking.dataUpdate(tasks);
                     refreshMainFrame();
                 }
             });
@@ -223,7 +209,6 @@ public class MainFrame {
             button.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     TaskManagement.Edit(finalI);
-                    TaskTracking.dataUpdate(tasks);
                     refreshMainFrame();
                 }
             });
@@ -240,7 +225,6 @@ public class MainFrame {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
                         String selectedOption = (String) comboBox.getSelectedItem();
                         tasks.get(finalI).setStatus(selectedOption);
-                        TaskTracking.dataUpdate(tasks);
                     }
                 }
             });
@@ -269,7 +253,6 @@ public class MainFrame {
                         tasks.get(finalI).setYear(cal.get(Calendar.YEAR));
                         tasks.get(finalI).setMonth(cal.get(Calendar.MONTH) + 1);
                         tasks.get(finalI).setDay(cal.get(Calendar.DAY_OF_MONTH));
-                        TaskTracking.dataUpdate(tasks);
                     }
                 }
             });
@@ -287,7 +270,7 @@ public class MainFrame {
             buttonAssign.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     TaskManagement.Assigns(tasks.get(finalI), finalI);
-                    TaskTracking.dataUpdate(tasks);
+                    assignTask(serverOut, tasks, finalI);
                     refreshMainFrame();
                 }
             });
@@ -329,35 +312,50 @@ public class MainFrame {
 
         taskPanel.revalidate();
         taskPanel.repaint();
-    }
-
-
-
-    private class MessageHandler implements Runnable {
-        @Override
-        public void run() {
-            try {
-                String message;
-                while ((message = serverIn.readLine()) != null) {
-                    processMessage(message);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    } 
+    
+    
+    private synchronized void initRequest() {
+    	try {
+        	serverOut.writeBytes("USER_INIT_DATA" + " " + info.getSessionId() + "\n");
+        }catch(IOException e) {
+        	System.out.println(e.getMessage());
         }
     }
-
-    private void processMessage(String message) {
-        StringTokenizer tokenizer = new StringTokenizer(message);
-        String commandType = tokenizer.nextToken();
-
-        switch (ServerInMsg.getEnum(commandType)) {
-            case UPDATE_TASK:
-                // handle task update
-                break;
-            case UPDATE_CHAT:
-                // handle chat update
-                break;
-        }
+    
+    private static synchronized void logout(DataOutputStream serverOut, ClientInfo info){
+    	serverResponse.init();
+    	serverResponse.setVisible(true);
+    	try {
+    		serverOut.writeBytes("LOGOUT" + " " + info.getSessionId() + "\n");
+    		info.setSessionId(null);
+    	}catch(IOException e) {
+    		
+    	}
     }
+    
+    private static synchronized void updateTask(DataOutputStream serverOut, List<Task> tasks){
+    	// need be fixed..., which file type need be send? txt ? list .obj?
+    	serverResponse.init();
+    	serverResponse.setVisible(true);
+    	try {
+    		serverOut.writeBytes("UPDATE_TASK" + " " + info.getSessionId() + " " + "file "+ "\n");
+    	}catch(IOException e) {
+    		
+    	}
+    }
+    
+    private static synchronized void assignTask(DataOutputStream serverOut, List<Task> tasks, int index){
+    	// need be fixed..., which file type need be send? txt ? list .obj?
+    	serverResponse.init();
+    	serverResponse.setVisible(true);
+    	try {
+    		serverOut.writeBytes("ASSIGN_TASK" + " " + info.getSessionId() + " " + "file" + "\n");
+    	}catch(IOException e) {
+    		
+    	}
+    }
+    
+    
+    
 }

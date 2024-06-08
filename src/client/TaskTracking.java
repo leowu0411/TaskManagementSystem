@@ -1,6 +1,4 @@
 package client;
-
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -8,13 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class TaskTracking {
-    
-    // 這裡是當每次更改資料後，就將更改完的內容放入資料庫內
-    public static void dataUpdate(List<Task> tasks){
-        // 將更改後的任務列表儲存到資料庫中
-    	
-    }
-
     private static boolean ascendingOrder = true; // 用來確認當下的排序方法
 
     public static void sortByStatus() {

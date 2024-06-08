@@ -1,11 +1,8 @@
 package parameter;
 
 public enum TaskCommand {
-	CREATE_TASK,
-    EDIT_TASK,
-    DELETE_TASK,
     ASSIGN_TASK,
-    UPDATE_STATUS,
+    UPDATE_TASK,
     USER_INIT_DATA;
 
     // Handle enum, in case invalid command lead to IllegalArgumentException

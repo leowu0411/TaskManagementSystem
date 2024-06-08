@@ -1,6 +1,10 @@
-package client;
+package parameter;
+
 
 public enum ServerInMsg {
+	RE_UPDATE_TASK,
+	RE_ASSIGN,
+	RE_LOGOUT,
 	UPDATE_CHAT,
 	UPDATE_TASK,
 	INIT_CHAT,

@@ -26,14 +26,14 @@ public class UserCommandHandler {
             	if(!handleLogout(tokenizer, clientOut)) {
                 	System.out.println("User Logout Faild");
                 }else {
-                	System.out.println("User Logout sucess");
+                	System.out.println("User Logout success");
                 }
             	break;
             case REGISTRATION:
                 if(!handleRegistration(tokenizer, clientOut)) {
                 	System.out.println("Registeration Faild");
                 }else {
-                	System.out.println("User Registeration sucess");
+                	System.out.println("User Registeration success");
                 }
                 break;
             case SESSION_REFRESH:
@@ -98,7 +98,7 @@ public class UserCommandHandler {
 					clientOut.writeBytes("Registeration Faild : username be used\n");
 	    			return false;
 				default:
-            		clientOut.writeBytes("Registeration Faild : unexpected error");
+            		clientOut.writeBytes("Registeration Faild : unexpected error\n");
             		return false;
     		}
 
@@ -111,13 +111,13 @@ public class UserCommandHandler {
     private boolean handleLogout(StringTokenizer tokenizer, DataOutputStream clientOut) {
         try {
             if (tokenizer.countTokens() < 1) {
-                clientOut.writeBytes("Invalid logout command\n");
+                clientOut.writeBytes("RE_LOGOUT " + "ERROR\n");
                 return false;
             }
 
             String sessionId = tokenizer.nextToken();
             SessionManager.invalidateSession(sessionId);
-            clientOut.writeBytes("Logout successful\n");
+            clientOut.writeBytes("RE_LOGOUT " + "SUCCESS\n");
             return true;
         } catch (IOException e) {
             System.out.println(e.getMessage());

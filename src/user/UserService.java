@@ -1,12 +1,9 @@
 package user;
-import java.util.ArrayList;
 import parameter.*;
-import java.util.List;
 import database.DatabaseUtil;
 
 
 public class UserService {
-	private List<User> userList = new ArrayList<>(); // replace by database implement, CRUD
 	private static UserService instance = null;
 	
 	private UserService() {}
@@ -29,7 +26,7 @@ public class UserService {
 		String hashedPassword = HashUtil.passwordHash(password);
 
 		User user = new User(name, hashedPassword);
-		userList.add(user);
+		DatabaseUtil.userList.add(user);
 		return ErrorMsg.SUCCESS;
 		// store back to databases
 	}

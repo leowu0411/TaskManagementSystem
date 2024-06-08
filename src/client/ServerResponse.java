@@ -1,31 +1,29 @@
 package client;
 
+import java.awt.BorderLayout;
+
 import javax.swing.*;
 
 public class ServerResponse extends JFrame {
-	private static JLabel status;
-	public static boolean flag;
-
+	private JLabel status;
 
 	public ServerResponse(){
-        setSize(300, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(400, 200);
         setLocationRelativeTo(null);
-        setLayout(null);
-        status = new JLabel();
-        status.setText("wait for server response....");
-	}
-	
-	public static void show(String response) {
-		 if (response.startsWith("SUCESS")) {
-	        	status.setText("SUCESS" + response.split(" ")[1]);
-	        	flag = true;
-	        }else {
-	        	status.setText("Request fail :" + response.split(" ")[1]);
-	        	flag = false;
-	        }
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
+        status = new JLabel("wait for server response....", SwingConstants.CENTER);
+        add(status, BorderLayout.CENTER);
 	}
 	
+	public void init() {
+		status.setText("wait for server response....");
+	}
+	
+	public void show(String response) {
+		status.setText(response);
+		
+	}
 	
 }
