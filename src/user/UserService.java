@@ -2,6 +2,7 @@ package user;
 import java.util.ArrayList;
 import parameter.*;
 import java.util.List;
+import database.DatabaseUtil;
 
 
 public class UserService {
@@ -17,19 +18,10 @@ public class UserService {
         return instance;
     }
 
-	// this method need to switch search database not in-memory access
-	public User findByUsername(String username) {
-		for(User user : userList) {
-			if(user.getUsername().equalsIgnoreCase(username)) {
-				return user;
-			}
-		}
-		return null;
-	}
 	
 	// register info and store back to  database
 	public ErrorMsg registerUser(String name, String password) {
-		if(findByUsername(name) != null) {
+		if(DatabaseUtil.findByUsername(name) != null) {
 			System.out.println("usernmae have been used");
 			return ErrorMsg.USER_NAME_BE_USED;
 		}
@@ -43,7 +35,7 @@ public class UserService {
 	}
 	
 	public ErrorMsg userLogin(String username, String password) {
-		User user = findByUsername(username);
+		User user = DatabaseUtil.findByUsername(username);
 		if(user != null && HashUtil.checkPassword(password, user.getPassword())) {
 			// enter session part
 			return ErrorMsg.SUCCESS;
@@ -56,5 +48,39 @@ public class UserService {
 		}		
 			
 	}
+	
+	public boolean changePassword(String newPassword, String oldPassword, String username) {
+		User user = DatabaseUtil.findByUsername(username);
+		
+		if(user == null) {
+			System.out.println("User :" + username + "not exist");;
+			return false;
+		}
+		
+		if(user != null && HashUtil.checkPassword(oldPassword, user.getPassword())){
+			 user.setPassword(newPassword);
+			 return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean changeUsername(String username, String newName) {
+		User user = DatabaseUtil.findByUsername(username);
+		
+		if(user == null) {
+			System.out.println("User :" + username + "not exist");;
+			return false;
+		}
+		
+		if(DatabaseUtil.findByUsername(newName) != null) {
+			System.out.println("Name has been used");
+			return false;
+		}else {
+			user.setUsername(newName);
+			return true;
+		}
+	}
+
 
 }

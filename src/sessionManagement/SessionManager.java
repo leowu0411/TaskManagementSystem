@@ -1,6 +1,7 @@
 package sessionManagement;
 
 import java.util.HashMap;
+import java.util.concurrent.*;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -8,8 +9,14 @@ import java.util.UUID;
 public class SessionManager {
     private static final long SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
     private static final Map<String, Session> sessions = new HashMap<>();
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    public static String createSession(String username) {
+    static {
+        // Schedule the session cleanup task
+        scheduler.scheduleAtFixedRate(new SessionAutoUpdate(), 0, 30, TimeUnit.MINUTES);
+    }
+
+    public static synchronized String createSession(String username) {
         String sessionId = UUID.randomUUID().toString();
         long expirationTime = System.currentTimeMillis() + SESSION_TIMEOUT_MS;
         Session session = new Session(sessionId, username, expirationTime);
@@ -17,24 +24,24 @@ public class SessionManager {
         return sessionId;
     }
 
-    public static boolean isValidSession(String sessionId) {
+    public static synchronized boolean isValidSession(String sessionId) {
         Session session = sessions.get(sessionId);
         return session != null && System.currentTimeMillis() <= session.getExpiryTime();
     }
 
-    public static String getUsername(String sessionId) {
+    public static synchronized String getUsername(String sessionId) {
         Session session = sessions.get(sessionId);
         return session != null ? session.getUsername() : null;
     }
 
-    public static void invalidateSession(String sessionId) {
+    public static synchronized void invalidateSession(String sessionId) {
     	if(sessionId == null) {
     		return;
     	}
         sessions.remove(sessionId);
     }
     
-    public static void checkAndInvalidateExpiredSessions() {
+    public static synchronized void checkAndInvalidateExpiredSessions() {
         long currentTime = System.currentTimeMillis();
         Iterator<Map.Entry<String, Session>> iterator = sessions.entrySet().iterator();
         while(iterator.hasNext()) {
@@ -45,7 +52,7 @@ public class SessionManager {
         }
     }
     
-    public static boolean sessionRefresh(String sessionId) {
+    public static synchronized boolean sessionRefresh(String sessionId) {
     	Session session = sessions.get(sessionId);
     	if(session == null) {
     		System.out.println("session not exist");
@@ -77,6 +84,19 @@ public class SessionManager {
 
         public String getUsername() {
             return username;
+        }
+    }
+    
+    
+    // call when server end, close the scheduler
+    public static void shutdownScheduler() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(60, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
         }
     }
 }

@@ -18,16 +18,22 @@ public class UserCommandHandler {
             case LOGIN:
                 if(!handleLogin(tokenizer, clientOut)) {
                 	System.out.println("User Login Faild");
+                }else {
+                	System.out.println("User login sucess");
                 }
                 break;
             case LOGOUT:
             	if(!handleLogout(tokenizer, clientOut)) {
-                	System.out.println("User Login Faild");
+                	System.out.println("User Logout Faild");
+                }else {
+                	System.out.println("User Logout sucess");
                 }
             	break;
             case REGISTRATION:
                 if(!handleRegistration(tokenizer, clientOut)) {
                 	System.out.println("Registeration Faild");
+                }else {
+                	System.out.println("User Registeration sucess");
                 }
                 break;
             case SESSION_REFRESH:
@@ -42,46 +48,48 @@ public class UserCommandHandler {
         }
     }
     
-    private boolean handleLogin(StringTokenizer tokenizer,  DataOutputStream clientOut) {
-    	String username = tokenizer.nextToken();
-    	String password = tokenizer.nextToken();
-    	try {
-    		if(tokenizer.countTokens() < 2) {
-    			clientOut.writeBytes("Invalid Command");
-    			return false;
-    		}
-    		
-    		switch (userService.userLogin(username, password)) {
-    			case SUCCESS:
-    				SessionManager.createSession(username);
-            		clientOut.writeBytes("Login Sucessfully \n!");
-            		return true;
-    			case USER_NOT_EXIST:
-    				clientOut.writeBytes("Login faild : user not exist");
-            		return false;
-    			case PASSWORD_WRONG:
-    				clientOut.writeBytes("Login faild : password wrong");
-            		return false;
-            	default:
-            		clientOut.writeBytes("Login faild : unexpected error");
-            		return false;
-    		}
-    		
-    	}catch(IOException e) {
-    		System.out.println(e.getMessage());
-    	}
-    	return false;
-    	
+    private boolean handleLogin(StringTokenizer tokenizer, DataOutputStream clientOut) {
+        try {
+            if (tokenizer.countTokens() < 2) {
+                clientOut.writeBytes("Invalid Command\n");
+                return false;
+            }
+
+            String username = tokenizer.nextToken();
+            String password = tokenizer.nextToken();
+
+            switch (userService.userLogin(username, password)) {
+                case SUCCESS:
+                    String sessionId = SessionManager.createSession(username);
+                    clientOut.writeBytes("Login Successfully! " + sessionId + "\n");
+                    return true;
+                case USER_NOT_EXIST:
+                    clientOut.writeBytes("Login failed: user not exist\n");
+                    return false;
+                case PASSWORD_WRONG:
+                    clientOut.writeBytes("Login failed: password wrong\n");
+                    return false;
+                default:
+                    clientOut.writeBytes("Login failed: unexpected error\n");
+                    return false;
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
+
     
     private boolean handleRegistration(StringTokenizer tokenizer, DataOutputStream clientOut) {
-    	String username = tokenizer.nextToken();
-    	String password = tokenizer.nextToken();
     	try {
     		if(tokenizer.countTokens() < 2) {
     			clientOut.writeBytes("Invalid Command");
     			return false;
     		}
+    		
+    		String username = tokenizer.nextToken();
+        	String password = tokenizer.nextToken();
+        	
     		switch(userService.registerUser(username, password)) {
 				case SUCCESS:
 					clientOut.writeBytes("Registeration Sucessed\n");

@@ -2,6 +2,8 @@ package server;
 import java.io.*;
 import java.net.*;
 
+import sessionManagement.SessionManager;
+
 
 public class Server {
 	public static final int PORT = 8000;
@@ -9,15 +11,17 @@ public class Server {
 	public static void main(String[] args) {
 		// open server socket
 		ServerSocket serversock = null;
+		
 		try {
 			serversock = new ServerSocket(PORT);
 			System.out.println("Server start...");
+			
 			
 			while(true) {
 				Socket connectionSock = serversock.accept();
 				ServiceThread service = new ServiceThread(connectionSock);
 				Thread serviceThread = new Thread(service);
-				serviceThread.run();
+				serviceThread.start();
 			}
 			
 		}catch(IOException e ) {
@@ -31,6 +35,9 @@ public class Server {
                     System.out.println("Error closing server socket: " + e.getMessage());
                 }
             }
+            
+            // shot down the scheduler
+            SessionManager.shutdownScheduler();
 		}
 
 	}

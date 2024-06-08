@@ -1,6 +1,8 @@
 package server;
 import user.*;
+import task.*;
 import parameter.*;
+import sessionManagement.SessionManager;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
@@ -8,14 +10,14 @@ import java.util.StringTokenizer;
 public class ServiceThread implements Runnable {
 	private Socket socket;
 	private UserCommandHandler ucm;
-	//private TaskCommandHandler tcm
+	private TaskCommandHandler tcm;
 	
 
 	
 	public ServiceThread(Socket socket) {
         this.socket = socket;
         this.ucm = new UserCommandHandler(); 
-        //this.tcm = new TaskCommandHandler();
+        this.tcm = new TaskCommandHandler();
     }
 
 	
@@ -23,6 +25,7 @@ public class ServiceThread implements Runnable {
 		try {
 			BufferedReader clientIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			DataOutputStream clientOut = new DataOutputStream(socket.getOutputStream());
+			
 			
 			while(true) {
 				String request = clientIn.readLine();
@@ -35,9 +38,13 @@ public class ServiceThread implements Runnable {
                 if(userCommand != null) {
                 	ucm.handle(tokenizer, userCommand, clientOut);
                 }else if(taskCommand != null) {
-                	//tcm.handle(tokenizer, userCommand, clientOut);
+                	tcm.handle(tokenizer, taskCommand, clientOut);
                 }else if("EXIT".equals(commandType)){
                 	clientOut.writeBytes("Service close\n");
+                	if(tokenizer.hasMoreTokens()) {
+                		SessionManager.invalidateSession(tokenizer.nextToken());
+                	}
+                	clientIn.close();
                 	socket.close();
                 	break;
                 }else {

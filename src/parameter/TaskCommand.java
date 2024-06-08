@@ -5,7 +5,8 @@ public enum TaskCommand {
     EDIT_TASK,
     DELETE_TASK,
     ASSIGN_TASK,
-    UPDATE_STATUS;
+    UPDATE_STATUS,
+    USER_INIT_DATA;
 
     // Handle enum, in case invalid command lead to IllegalArgumentException
     public static TaskCommand getEnum(String value) {
