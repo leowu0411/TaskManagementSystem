@@ -335,24 +335,29 @@ public class MainFrame {
     }
     
     private static synchronized void updateTask(DataOutputStream serverOut, List<Task> tasks){
-    	// need be fixed..., which file type need be send? txt ? list .obj?
     	serverResponse.init();
     	serverResponse.setVisible(true);
     	try {
-    		serverOut.writeBytes("UPDATE_TASK" + " " + info.getSessionId() + " " + "file "+ "\n");
+    		StringBuilder taskDataBuilder = new StringBuilder();
+    		for(Task task : tasks) {
+    			String taskData = task.toString();
+    			taskDataBuilder.append(taskData).append(";");
+    		}
+    		serverOut.writeBytes("UPDATE_TASK" + " " + info.getSessionId() + " " + taskDataBuilder.toString() + "\n");
     	}catch(IOException e) {
-    		
+    		e.printStackTrace();
     	}
     }
     
     private static synchronized void assignTask(DataOutputStream serverOut, List<Task> tasks, int index){
-    	// need be fixed..., which file type need be send? txt ? list .obj?
     	serverResponse.init();
     	serverResponse.setVisible(true);
     	try {
-    		serverOut.writeBytes("ASSIGN_TASK" + " " + info.getSessionId() + " " + "file" + "\n");
+    		Task task = tasks.get(index);
+    		String taskData = task.toString();
+    		serverOut.writeBytes("ASSIGN_TASK" + " " + info.getSessionId() + " " + taskData + "\n");
     	}catch(IOException e) {
-    		
+    		e.printStackTrace();
     	}
     }
     

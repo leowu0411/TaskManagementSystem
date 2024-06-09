@@ -2,6 +2,9 @@ package client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import parameter.ServerInMsg;
@@ -49,10 +52,10 @@ public class MessageHandler implements Runnable {
             case INIT_TASK:
                 handleInit(tokenizer);
                 break;
-            case INIT_CHAT:
-                break;
             case UPDATE_TASK:
                 // handle task update
+                break;
+            case INIT_CHAT:
                 break;
             case UPDATE_CHAT:
                 // handle chat update
@@ -75,8 +78,30 @@ public class MessageHandler implements Runnable {
             serverResponse.show(status + tokenizer.nextToken());
         }
 
-        // handle following data....
-        // below is test code
+       
+        // once the database complete and have correct format then this can work
+        /*
+        List<Task> tasks = new ArrayList<>();
+        while (tokenizer.hasMoreTokens()) {
+        	String taskData = tokenizer.nextToken(";");
+            String[] fields = taskData.split("\\|");
+            Task task = new Task(
+                    fields[0],                          // name
+                    fields[1],                          // status
+                    Integer.parseInt(fields[2]),        // year
+                    Integer.parseInt(fields[3]),        // month
+                    Integer.parseInt(fields[4]),        // day
+                    fields[5],                          // content
+                    Integer.parseInt(fields[6]),        // notificationYear
+                    Integer.parseInt(fields[7]),        // notificationMonth
+                    Integer.parseInt(fields[8]),        // notificationDay
+                    new ArrayList<>(Arrays.asList(fields[9].split(","))) // userIDs
+                );
+            tasks.add(task);
+        }
+        */
+        
+        //below is place holder,
         MainFrame.tasks.add(new Task("task0", "Not Started", 2021, 9, 10, "Task 0 content"));
         MainFrame.tasks.get(0).addUser("0");
 
@@ -123,6 +148,10 @@ public class MessageHandler implements Runnable {
         } else {
             serverResponse.show("Invalid Request");
         }
+    }
+    
+    private void handleTaskUpdate(StringTokenizer tokenizer) {
+    	
     }
 
 }

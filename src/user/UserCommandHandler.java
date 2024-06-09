@@ -1,15 +1,17 @@
 package user;
 import parameter.*;
 import sessionManagement.*;
+import server.TaskUpdateChecker;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
 public class UserCommandHandler {
-	
+	private TaskUpdateChecker taskUpdateChecker;
 	private UserService userService;
 
-    public UserCommandHandler() {
+    public UserCommandHandler(TaskUpdateChecker taskUpdateChecker) {
+    	this.taskUpdateChecker = taskUpdateChecker;
         this.userService = UserService.getInstance();
     }
 
@@ -27,6 +29,9 @@ public class UserCommandHandler {
                 	System.out.println("User Logout Faild");
                 }else {
                 	System.out.println("User Logout success");
+                	if(taskUpdateChecker != null) {
+                		taskUpdateChecker.stop();
+                	}
                 }
             	break;
             case REGISTRATION:

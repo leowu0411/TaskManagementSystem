@@ -26,6 +26,32 @@ public class Task {
         this.notificationDay = 0;
         this.userIDs = new ArrayList<>();
     }
+    
+    public Task(String name, String status, int year, int month, int day, String content, int notificationYear, int notificationMonth, int notificationDay) {
+        this.name = name;
+        this.status = status;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.content = content;
+        this.notificationYear = notificationYear;
+        this.notificationMonth = notificationMonth;
+        this.notificationDay = notificationDay;
+        this.userIDs = new ArrayList<>();
+    }
+    
+    public Task(String name, String status, int year, int month, int day, String content, int notificationYear, int notificationMonth, int notificationDay, ArrayList<String> userIds) {
+        this.name = name;
+        this.status = status;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.content = content;
+        this.notificationYear = notificationYear;
+        this.notificationMonth = notificationMonth;
+        this.notificationDay = notificationDay;
+        this.userIDs = userIds;
+    }
 
     public String getName() {
         return name;
@@ -113,5 +139,20 @@ public class Task {
 
     public void setNotificationDay(int notificationDay) {
         this.notificationDay = notificationDay;
+    }
+    
+    public String toString() {
+    	String taskData = this.getName() + "|" +
+			              this.getStatus() + "|" +
+			              this.getYear() + "|" +
+			              this.getMonth() + "|" +
+			              this.getDay() + "|" +
+			              this.getContent() + "|" +
+			              this.getNotificationYear() + "|" +
+                          this.getNotificationMonth() + "|" +
+                          this.getNotificationDay() + "|" +
+			              String.join(",", this.getUserIDs());
+    	
+    	return taskData;
     }
 }

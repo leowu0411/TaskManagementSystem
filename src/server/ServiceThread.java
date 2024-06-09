@@ -11,13 +11,10 @@ public class ServiceThread implements Runnable {
 	private Socket socket;
 	private UserCommandHandler ucm;
 	private TaskCommandHandler tcm;
-	
-
+	private TaskUpdateChecker taskUpdateChecker;
 	
 	public ServiceThread(Socket socket) {
         this.socket = socket;
-        this.ucm = new UserCommandHandler(); 
-        this.tcm = new TaskCommandHandler();
     }
 
 	
@@ -26,9 +23,16 @@ public class ServiceThread implements Runnable {
 			BufferedReader clientIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			DataOutputStream clientOut = new DataOutputStream(socket.getOutputStream());
 			
+			taskUpdateChecker = new TaskUpdateChecker(clientOut);
+			this.tcm = new TaskCommandHandler(taskUpdateChecker);
+			this.ucm = new UserCommandHandler(taskUpdateChecker); 
 			
 			while(true) {
 				String request = clientIn.readLine();
+				if (request == null) {
+                    break; // Client disconnected
+                }
+				
 				System.out.println("received client request :" + request);
 				StringTokenizer tokenizer = new StringTokenizer(request);
 				String commandType = tokenizer.nextToken();
@@ -56,11 +60,16 @@ public class ServiceThread implements Runnable {
 		}catch(IOException e) {
 			System.out.println(e.getMessage());
 		}finally {
-	        try {
-	            socket.close(); // Ensure socket is closed even if an exception occurs
-	        } catch (IOException e) {
-	            System.out.println("Error closing socket: " + e.getMessage());
-	        }
+			try {
+                if (taskUpdateChecker != null) {
+                    taskUpdateChecker.stop();
+                }
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("Error closing socket: " + e.getMessage());
+            }
 	    }
 	}
 	
