@@ -25,7 +25,7 @@ public class TaskManagement {
 
     private static Container cp;
 
-    public static void Create(int index, JFrame frame) { // index 為當下所按的"+"的是第幾個tasks
+    public static void Create(JFrame frame) { // index 為當下所按的"+"的是第幾個tasks
 
     	MainFrame.tasksNumber++; // Increase the task count
     	 // 預設日期為創建task的當天日期

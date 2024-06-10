@@ -39,11 +39,15 @@ public class TaskUpdateChecker implements Runnable {
     }
 	
 	public synchronized void run () {
-		
 		List<TaskAssignment> newAssignments = DatabaseUtil.getNewTaskAssignments(username);
 		try {
-			for(TaskAssignment taskAssignment : newAssignments) {
-				clientOut.writeBytes("UPDATE_TASK " + taskAssignment.toString() + "\n");
+			if(newAssignments.size() > 0) {
+				StringBuilder taskDataBuilder = new StringBuilder();
+				for(TaskAssignment taskAssignment : newAssignments) {			
+					String taskData = taskAssignment.toString();
+					taskDataBuilder.append(taskData).append(";");					
+				}
+				clientOut.writeBytes("UPDATE_TASK " + taskDataBuilder.toString() + "\n");
 			}
 		}catch(IOException e) {
 			e.printStackTrace();

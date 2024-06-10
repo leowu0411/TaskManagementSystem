@@ -15,6 +15,16 @@ public class TaskAssignment extends Task {
 	
 	@Override
     public String toString() {
-        return super.toString() + "|" + taskAssigner;
+		String taskData = this.getName() + "|" +
+	              this.getStatus() + "|" +
+	              this.getYear() + "|" +
+	              this.getMonth() + "|" +
+	              this.getDay() + "|" +
+	              this.getContent() + "|" +
+	              this.getNotificationYear() + "|" +
+	              this.getNotificationMonth() + "|" +
+	              this.getNotificationDay() + "|" +
+	              this.taskAssigner;
+		return taskData;
     }
 }

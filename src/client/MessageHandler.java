@@ -8,19 +8,22 @@ import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import parameter.ServerInMsg;
+import task.TaskAssignment;
 
 public class MessageHandler implements Runnable {
     private BufferedReader serverIn;
     private ServerResponse serverResponse;
     private JFrame frame;
     private JFrame loginForm;
+    private AssignBox assignBox;
     private volatile boolean running = true; // Add a flag to control the loop
 
-    public MessageHandler(BufferedReader serverIn, ServerResponse serverResponse, JFrame frame, JFrame loginForm) {
+    public MessageHandler(BufferedReader serverIn, ServerResponse serverResponse, JFrame frame, JFrame loginForm, AssignBox assignBox) {
         this.serverIn = serverIn;
         this.serverResponse = serverResponse;
         this.frame = frame;
         this.loginForm = loginForm;
+        this.assignBox = assignBox;
     }
 
     @Override
@@ -142,6 +145,8 @@ public class MessageHandler implements Runnable {
         System.out.println(status);
         if (status.equals("SUCCESS")) {
             serverResponse.show("Logout sucessfully: go back to login interface...");
+            MainFrame.tasks.clear();
+            frame.getContentPane().removeAll();
             frame.dispose();
             loginForm.setVisible(true);
             running = false; // Call to stop the thread
@@ -151,7 +156,23 @@ public class MessageHandler implements Runnable {
     }
     
     private void handleTaskUpdate(StringTokenizer tokenizer) {
-    	
+    	List<TaskAssignment> taskAssignments = new ArrayList<>();
+    	while(tokenizer.hasMoreTokens()) {
+    		String taskInfo = tokenizer.nextToken(";");
+    		String[] fields = taskInfo.split("\\|");
+    		TaskAssignment task = new TaskAssignment(fields[0],                          // name
+								                    fields[1],                          // status
+								                    Integer.parseInt(fields[2]),        // year
+								                    Integer.parseInt(fields[3]),        // month
+								                    Integer.parseInt(fields[4]),        // day
+								                    fields[5],                          // content
+								                    Integer.parseInt(fields[6]),        // notificationYear
+								                    Integer.parseInt(fields[7]),        // notificationMonth
+								                    Integer.parseInt(fields[8]),        // notificationDay)
+								                    fields[9]);
+    		taskAssignments.add(task);
+    	}
+    	assignBox.updateTaskList(taskAssignments);
     }
 
 }

@@ -37,6 +37,7 @@ public class MainFrame {
     private static ServerResponse serverResponse;
     private ConfirmWindow confirmWindow;
     private LoginForm loginForm;
+    private AssignBox assignBox;
 
     public MainFrame(DataOutputStream serverOut, BufferedReader serverIn, ClientInfo info, ConfirmWindow confirmWindow, LoginForm loginForm) {
         this.info = info;
@@ -49,7 +50,8 @@ public class MainFrame {
         // open server message listener
         serverResponse = new ServerResponse();
         serverResponse.setVisible(true);
-        new Thread(new MessageHandler(serverIn, this.serverResponse, this.frame, this.loginForm)).start();
+        this.assignBox = new AssignBox();
+        new Thread(new MessageHandler(serverIn, this.serverResponse, this.frame, this.loginForm, this.assignBox)).start();
         //send data request to server...
         initRequest();
         
@@ -110,41 +112,55 @@ public class MainFrame {
         cp.add(sortByDateButton);
         
         JButton createButton = new JButton("Create");
-        createButton.setBounds(970, 85, 150, 25);
+        createButton.setBounds(970, 90, 150, 25);
         createButton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                TaskManagement.Create(tasksNumber, frame);                
+                TaskManagement.Create(frame);                
                 refreshMainFrame();
             }
         });
         cp.add(createButton);
         
+     // Assign Box button
+        JButton assignBoxButton = new JButton("Assign Box");
+        assignBoxButton.setBounds(970, 125, 150, 25);
+        assignBoxButton.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                assignBox.setVisible(true);
+            }
+        });
+        cp.add(assignBoxButton);
+
+        // Save button
         JButton SaveButton = new JButton("Save");
-        SaveButton.setBounds(970, 120, 150, 25);
+        SaveButton.setBounds(970, 160, 150, 25);
         SaveButton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-            	updateTask(serverOut, tasks);
+                updateTask(serverOut, tasks);
             }
         });
         cp.add(SaveButton);
-        
+
+        // Logout button
         JButton LogoutButton = new JButton("Logout");
-        LogoutButton.setBounds(970, 155, 150, 25);
+        LogoutButton.setBounds(970, 195, 150, 25);
         LogoutButton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 logout(serverOut, info);
             }
         });
         cp.add(LogoutButton);
-        
+
+        // EXIT button
         JButton ExitButton = new JButton("EXIT");
-        ExitButton.setBounds(970, 190, 150, 25);
+        ExitButton.setBounds(970, 230, 150, 25);
         ExitButton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-            	confirmWindow.setVisible(true);
+                confirmWindow.setVisible(true);
             }
         });
         cp.add(ExitButton);
+
 
         frame.setVisible(true);
     }
@@ -360,7 +376,5 @@ public class MainFrame {
     		e.printStackTrace();
     	}
     }
-    
-    
     
 }

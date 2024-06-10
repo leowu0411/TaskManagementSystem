@@ -1,6 +1,7 @@
 package client;
 
 import java.util.ArrayList;
+import task.TaskAssignment;
 
 public class Task {
     private String name;
@@ -52,6 +53,20 @@ public class Task {
         this.notificationDay = notificationDay;
         this.userIDs = userIds;
     }
+    
+    public Task(TaskAssignment taskAssignment) {
+        this.name = taskAssignment.getName();
+        this.status = taskAssignment.getStatus();
+        this.year = taskAssignment.getYear();
+        this.month = taskAssignment.getMonth();
+        this.day = taskAssignment.getDay();
+        this.content = taskAssignment.getContent();
+        this.notificationYear = taskAssignment.getNotificationYear();
+        this.notificationMonth = taskAssignment.getNotificationMonth();
+        this.notificationDay = taskAssignment.getNotificationDay();
+        this.userIDs = new ArrayList<>();
+    }
+
 
     public String getName() {
         return name;
