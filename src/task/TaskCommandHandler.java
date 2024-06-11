@@ -72,7 +72,7 @@ public class TaskCommandHandler {
 		 // the attribute "user id list" is use "," to separate elements in the list
 		 // replace "file" below as real string
 		 String initData = DatabaseUtil.initializeUserData(username);
-		 taskUpdateChecker.setUsername(username);
+		 //taskUpdateChecker.setUsername(username);
 		 clientOut.writeBytes("INIT_TASK SUCCESS " + initData + "\n");
 		 return true;
 	}

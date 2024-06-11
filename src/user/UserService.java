@@ -4,19 +4,9 @@ import parameter.ErrorMsg;
 import database.DatabaseUtil;
 
 public class UserService {
-    private static UserService instance = null;
-
-    private UserService() {}
-
-    public static UserService getInstance() {
-        if (instance == null) {
-            instance = new UserService();
-        }
-        return instance;
-    }
 
     // Register info and store back to database
-    public ErrorMsg registerUser(String name, String password) {
+    public static ErrorMsg registerUser(String name, String password) {
         if (DatabaseUtil.findByUsername(name) != null) {
             System.out.println("Username has been used");
             return ErrorMsg.USER_NAME_BE_USED;
@@ -28,7 +18,7 @@ public class UserService {
         return ErrorMsg.SUCCESS;
     }
 
-    public ErrorMsg userLogin(String username, String password) {
+    public static ErrorMsg userLogin(String username, String password) {
         User user = DatabaseUtil.findByUsername(username);
         if (user != null && HashUtil.checkPassword(password, user.getPassword())) {
             // Enter session part
@@ -42,7 +32,7 @@ public class UserService {
         }
     }
 
-    public boolean changePassword(String newPassword, String oldPassword, String username) {
+    public static boolean changePassword(String newPassword, String oldPassword, String username) {
         User user = DatabaseUtil.findByUsername(username);
 
         if (user == null) {
@@ -57,7 +47,7 @@ public class UserService {
         return false;
     }
 
-    public boolean changeUsername(String username, String newName) {
+    public static boolean changeUsername(String username, String newName) {
         User user = DatabaseUtil.findByUsername(username);
 
         if (user == null) {

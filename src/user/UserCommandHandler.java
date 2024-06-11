@@ -8,11 +8,9 @@ import java.util.StringTokenizer;
 
 public class UserCommandHandler {
 	private TaskUpdateChecker taskUpdateChecker;
-	private UserService userService;
 
     public UserCommandHandler(TaskUpdateChecker taskUpdateChecker) {
     	this.taskUpdateChecker = taskUpdateChecker;
-        this.userService = UserService.getInstance();
     }
 
     public void handle(StringTokenizer tokenizer, UserCommand command, DataOutputStream clientOut) throws IOException {
@@ -63,7 +61,7 @@ public class UserCommandHandler {
             String username = tokenizer.nextToken();
             String password = tokenizer.nextToken();
 
-            switch (userService.userLogin(username, password)) {
+            switch (UserService.userLogin(username, password)) {
                 case SUCCESS:
                     String sessionId = SessionManager.createSession(username);
                     clientOut.writeBytes("Login Successfully! " + sessionId + "\n");
@@ -95,7 +93,7 @@ public class UserCommandHandler {
     		String username = tokenizer.nextToken();
         	String password = tokenizer.nextToken();
         	
-    		switch(userService.registerUser(username, password)) {
+    		switch(UserService.registerUser(username, password)) {
 				case SUCCESS:
 					clientOut.writeBytes("Registeration Sucessed\n");
 	    			return true;
