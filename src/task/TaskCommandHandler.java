@@ -72,7 +72,7 @@ public class TaskCommandHandler {
 		 // the attribute "user id list" is use "," to separate elements in the list
 		 // replace "file" below as real string
 		 String initData = DatabaseUtil.initializeUserData(username);
-		 //taskUpdateChecker.setUsername(username);
+		 taskUpdateChecker.setUsername(username);
 		 clientOut.writeBytes("INIT_TASK SUCCESS " + initData + "\n");
 		 return true;
 	}
@@ -89,12 +89,6 @@ public class TaskCommandHandler {
 			 clientOut.writeBytes("RE_UPDATE_TASK Error\n");
 			 return false;
 		 }
-		// how task list be send by client:
-		// each task's attribute is separated by "|" and each task is separate by ";" 
-		// the attribute "user id list" is use "," to separate elements in the list
-
-        // Use user name to update the client's task list in the database
-        // This is a placeholder, replace with actual database update logic
 		
 		List<Task> tasks = new ArrayList<>();
         while (tokenizer.hasMoreTokens()) {
@@ -109,9 +103,12 @@ public class TaskCommandHandler {
                     fields[5],                          // content
                     Integer.parseInt(fields[6]),        // notificationYear
                     Integer.parseInt(fields[7]),        // notificationMonth
-                    Integer.parseInt(fields[8]),        // notificationDay
-                    new ArrayList<>(Arrays.asList(fields[9].split(","))) // userIDs
+                    Integer.parseInt(fields[8])        // notificationDay        
                 );
+            if(fields.length > 9 && fields[9] != null) {
+            	task.setUserIDs(new ArrayList<>(Arrays.asList(fields[9].split(",")))); 
+            }
+            
             tasks.add(task);
         }
         boolean updateSuccess = DatabaseUtil.updateTasksInDatabase(username, tasks);

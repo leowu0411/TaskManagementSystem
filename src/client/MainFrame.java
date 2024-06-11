@@ -285,8 +285,7 @@ public class MainFrame {
             buttonAssign.setMaximumSize(new Dimension(150, 30));
             buttonAssign.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    TaskManagement.Assigns(tasks.get(finalI), finalI);
-                    assignTask(serverOut, tasks, finalI);
+                    TaskManagement.Assigns(serverResponse, info, serverOut, tasks.get(finalI), finalI);
                     refreshMainFrame();
                 }
             });
@@ -365,16 +364,5 @@ public class MainFrame {
     	}
     }
     
-    private static synchronized void assignTask(DataOutputStream serverOut, List<Task> tasks, int index){
-    	serverResponse.init();
-    	serverResponse.setVisible(true);
-    	try {
-    		Task task = tasks.get(index);
-    		String taskData = task.toString();
-    		serverOut.writeBytes("ASSIGN_TASK" + " " + info.getSessionId() + " " + taskData + "\n");
-    	}catch(IOException e) {
-    		e.printStackTrace();
-    	}
-    }
     
 }

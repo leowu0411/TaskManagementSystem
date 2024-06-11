@@ -47,6 +47,10 @@ public class AssignBox extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(acceptButton);
         buttonPanel.add(rejectButton);
+        
+        // Set preferred sizes for the list and detail components
+        taskList.setPreferredSize(new Dimension(200, 150)); // Adjust width and height as needed
+        taskDetails.setPreferredSize(new Dimension(200, 150)); // Adjust width and height as needed
 
         add(new JScrollPane(taskList), BorderLayout.CENTER);
         add(new JScrollPane(taskDetails), BorderLayout.SOUTH);
@@ -54,6 +58,7 @@ public class AssignBox extends JFrame {
     }
 
     public void updateTaskList(List<TaskAssignment> tasks) {
+    	System.out.println("add task assignment");
         for (TaskAssignment task : tasks) {
             taskListModel.addElement(task);
         }

@@ -20,7 +20,12 @@ public class TaskUpdateChecker implements Runnable {
 	}
 
     public void start() {
-        scheduler.scheduleAtFixedRate(this, 0, 20, TimeUnit.SECONDS);
+    	if (scheduler.isShutdown() || scheduler.isTerminated()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(this, 0, 20, TimeUnit.SECONDS);
+        }else {
+        	scheduler.scheduleAtFixedRate(this, 0, 20, TimeUnit.SECONDS);
+        }
     }
     
     public void stop() {

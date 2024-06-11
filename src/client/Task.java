@@ -167,7 +167,6 @@ public class Task {
                           this.getNotificationMonth() + "|" +
                           this.getNotificationDay() + "|" +
 			              String.join(",", this.getUserIDs());
-    	
     	return taskData;
     }
 }

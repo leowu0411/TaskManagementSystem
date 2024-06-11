@@ -31,6 +31,7 @@ public class MessageHandler implements Runnable {
         try {
             String message;
             while (running && (message = serverIn.readLine()) != null) {
+            	System.out.println("received server response :" + message);
                 processMessage(message);
             }
         } catch (IOException e) {
@@ -56,6 +57,7 @@ public class MessageHandler implements Runnable {
                 handleInit(tokenizer);
                 break;
             case UPDATE_TASK:
+            	handleTaskUpdate(tokenizer);
                 // handle task update
                 break;
             case INIT_CHAT:
@@ -69,7 +71,7 @@ public class MessageHandler implements Runnable {
     }
 
     private void handleInit(StringTokenizer tokenizer) {
-        if (tokenizer.countTokens() < 2) {
+        if (tokenizer.countTokens() < 1) {
             serverResponse.show("Invalid Command");
             return;
         }
@@ -82,8 +84,7 @@ public class MessageHandler implements Runnable {
         }
 
        
-        // once the database complete and have correct format then this can work
-        /*
+        
         List<Task> tasks = new ArrayList<>();
         while (tokenizer.hasMoreTokens()) {
         	String taskData = tokenizer.nextToken(";");
@@ -97,23 +98,14 @@ public class MessageHandler implements Runnable {
                     fields[5],                          // content
                     Integer.parseInt(fields[6]),        // notificationYear
                     Integer.parseInt(fields[7]),        // notificationMonth
-                    Integer.parseInt(fields[8]),        // notificationDay
-                    new ArrayList<>(Arrays.asList(fields[9].split(","))) // userIDs
+                    Integer.parseInt(fields[8])        // notificationDay        
                 );
-            tasks.add(task);
+            if(fields.length > 9 && fields[9] != null) {
+            	task.setUserIDs(new ArrayList<>(Arrays.asList(fields[9].split(",")))); 
+            }
+            MainFrame.tasks.add(task);
         }
-        */
         
-        //below is place holder,
-        MainFrame.tasks.add(new Task("task0", "Not Started", 2021, 9, 10, "Task 0 content"));
-        MainFrame.tasks.get(0).addUser("0");
-
-        MainFrame.tasks.add(new Task("task1", "Not Started", 2023, 10, 15, "Task 1 content"));
-        MainFrame.tasks.get(1).addUser("1");
-
-        MainFrame.tasks.add(new Task("task2", "Done", 2022, 5, 20, "Task 2 content"));
-        MainFrame.tasks.get(2).addUser("2");
-
         MainFrame.tasksNumber = MainFrame.tasks.size();
         MainFrame.refreshMainFrame();
     }

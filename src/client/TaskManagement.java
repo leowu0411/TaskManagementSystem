@@ -15,6 +15,8 @@ import org.jdatepicker.impl.UtilDateModel;
 import javax.swing.JComboBox;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Properties;
 import java.awt.Container;
 import java.util.Calendar;
@@ -174,7 +176,7 @@ public class TaskManagement {
         frame.setVisible(true);
     }
 
-    public static void Assigns(final Task task, int index) {
+    public static void Assigns(ServerResponse serverResponse, ClientInfo info, DataOutputStream serverOut, final Task task, int index) {
         final JFrame assignFrame = new JFrame();
         assignFrame.setSize(400, 400);
         assignFrame.setLocation(200, 200);
@@ -197,10 +199,18 @@ public class TaskManagement {
         assignButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String assignedUser = userField.getText();
+                task.addUser(assignedUser);
+                JOptionPane.showMessageDialog(assignFrame, "Task assigned to " + assignedUser);
+                assignFrame.dispose();
+                serverResponse.init();
+            	serverResponse.setVisible(true);
                 if (!assignedUser.isEmpty()) {
-                    JOptionPane.showMessageDialog(assignFrame, "Task assigned to " + assignedUser);
-                    task.addUser(assignedUser);
-                    assignFrame.dispose();
+                	try {
+                		String taskData = task.toString();
+                		serverOut.writeBytes("ASSIGN_TASK" + " " + info.getSessionId() + " " + taskData + "\n");
+                	}catch(IOException t) {
+                		t.printStackTrace();
+                	}                     
                     MainFrame.refreshMainFrame();
                 } else {
                     JOptionPane.showMessageDialog(assignFrame, "請輸入ID", "Error", JOptionPane.ERROR_MESSAGE);

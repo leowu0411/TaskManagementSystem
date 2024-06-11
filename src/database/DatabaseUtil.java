@@ -227,7 +227,10 @@ public class DatabaseUtil {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
-        output_string = output_string.substring(0, output_string.length() - 1);
+        if (!output_string.isEmpty()) {
+            output_string = output_string.substring(0, output_string.length() - 1);
+        }
+
         return output_string;
     }
 
