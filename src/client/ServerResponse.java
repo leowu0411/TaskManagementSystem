@@ -22,7 +22,16 @@ public class ServerResponse extends JFrame {
 	}
 	
 	public void show(String response) {
+		this.setVisible(true);
 		status.setText(response);
+		
+		try {
+			Thread.sleep(1500);
+		}catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		this.setVisible(false);
 		
 	}
 	

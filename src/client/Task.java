@@ -169,4 +169,18 @@ public class Task {
 			              String.join(",", this.getUserIDs());
     	return taskData;
     }
+    
+    public String toAssignString(String assignedUser) {
+    	String taskData = this.getName() + "|" +
+			              this.getStatus() + "|" +
+			              this.getYear() + "|" +
+			              this.getMonth() + "|" +
+			              this.getDay() + "|" +
+			              this.getContent() + "|" +
+			              this.getNotificationYear() + "|" +
+                          this.getNotificationMonth() + "|" +
+                          this.getNotificationDay() + "|" +
+                          assignedUser;
+    	return taskData;
+    }
 }

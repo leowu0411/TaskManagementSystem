@@ -124,9 +124,13 @@ public class MessageHandler implements Runnable {
     private void handleAssignReply(StringTokenizer tokenizer) {
         String status = tokenizer.nextToken();
         if (status.equals("SUCCESS")) {
-            serverResponse.show("task assign process sucess\n");
+            serverResponse.show("task assign process success\n");
         } else if (status.equals("FAIL")) {
-            serverResponse.show("task assign process fail\n");
+        	if(tokenizer.hasMoreTokens()) {
+        		serverResponse.show("task assign process fail " + tokenizer.nextToken("\n"));
+        	}else {
+        		serverResponse.show("task assign process fail\n");
+        	}
         } else {
             serverResponse.show("session is invalid, please relogin....\n");
         }
@@ -136,7 +140,7 @@ public class MessageHandler implements Runnable {
         String status = tokenizer.nextToken();
         System.out.println(status);
         if (status.equals("SUCCESS")) {
-            serverResponse.show("Logout sucessfully: go back to login interface...");
+            serverResponse.show("Logout successfully: go back to login interface...");
             MainFrame.tasks.clear();
             frame.getContentPane().removeAll();
             frame.dispose();
@@ -165,6 +169,7 @@ public class MessageHandler implements Runnable {
     		taskAssignments.add(task);
     	}
     	assignBox.updateTaskList(taskAssignments);
+    	serverResponse.show("There's new assignment, check out Assign Box !");
     }
 
 }

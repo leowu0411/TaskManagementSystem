@@ -158,10 +158,15 @@ public class TaskCommandHandler {
 	        username							// assigner
 	    );
 
-	    List<String> userIds = Arrays.asList(fields[9].split(","));
+	    String target = fields[9];
+	    boolean assignSuccess = false;
+	    if(DatabaseUtil.findByUsername(target) != null) {
+	    	assignSuccess = DatabaseUtil.assignTaskToUser(task, target);
+	    }else {
+	    	clientOut.writeBytes("RE_ASSIGN FAIL user not exist\n");
+	    	return false;
+	    }
 	    
-	    boolean assignSuccess = DatabaseUtil.assignTaskToUsers(task, userIds);
-
 	    if (assignSuccess) {
 	        clientOut.writeBytes("RE_ASSIGN SUCCESS\n");
 	        return true;

@@ -91,35 +91,33 @@ public class DatabaseUtil {
     }
 
     /**
-     * Assigns a task to a list of users.
+     * Assigns a task to a single user.
      * @param task The task to be assigned.
-     * @param userIds List of user IDs to whom the task is assigned.
+     * @param username The username of the user to whom the task is assigned.
      * @return true if the assignment was successful, false otherwise.
      */
-    public synchronized static boolean assignTaskToUsers(TaskAssignment task, List<String> userIds) {
+    public synchronized static boolean assignTaskToUser(TaskAssignment task, String username) {
         // Placeholder for actual database logic
-        for(int i = 0;i < userIds.size(); i++){
-            String sql = "INSERT INTO UserData(name, username, creator, userIDs, status, year, month, day, content, notificationYear, notificationMonth, notificationDay) VALUES(? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            try(Connection conn = Connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
-                pstmt.setString(1, task.getName());
-                pstmt.setString(2, userIds.get(i));
-                pstmt.setString(3, task.getTaskAssigner());
-                pstmt.setString(4, "");
-                pstmt.setString(5, task.getStatus());
-                pstmt.setInt(6, task.getYear());
-                pstmt.setInt(7, task.getMonth());
-                pstmt.setInt(8, task.getDay());
-                pstmt.setString(9, task.getContent());
-                pstmt.setInt(10, task.getNotificationYear());
-                pstmt.setInt(11, task.getNotificationMonth());
-                pstmt.setInt(12, task.getNotificationDay());
-                pstmt.executeUpdate();
-            }catch(SQLException e){
-                System.out.println(e.getMessage());
-                return false;
-            }
+        String sql = "INSERT INTO UserData(name, username, creator, userIDs, status, year, month, day, content, notificationYear, notificationMonth, notificationDay) VALUES(? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = Connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, task.getName());
+            pstmt.setString(2, username);
+            pstmt.setString(3, task.getTaskAssigner());
+            pstmt.setString(4, "");
+            pstmt.setString(5, task.getStatus());
+            pstmt.setInt(6, task.getYear());
+            pstmt.setInt(7, task.getMonth());
+            pstmt.setInt(8, task.getDay());
+            pstmt.setString(9, task.getContent());
+            pstmt.setInt(10, task.getNotificationYear());
+            pstmt.setInt(11, task.getNotificationMonth());
+            pstmt.setInt(12, task.getNotificationDay());
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
         }
-        return true;
     }
 
     /**

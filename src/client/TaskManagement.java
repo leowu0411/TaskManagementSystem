@@ -206,7 +206,7 @@ public class TaskManagement {
             	serverResponse.setVisible(true);
                 if (!assignedUser.isEmpty()) {
                 	try {
-                		String taskData = task.toString();
+                		String taskData = task.toAssignString(assignedUser);
                 		serverOut.writeBytes("ASSIGN_TASK" + " " + info.getSessionId() + " " + taskData + "\n");
                 	}catch(IOException t) {
                 		t.printStackTrace();
