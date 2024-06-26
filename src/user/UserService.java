@@ -1,49 +1,65 @@
 package user;
-import java.util.ArrayList;
-import java.util.List;
 
+import parameter.ErrorMsg;
+import database.DatabaseUtil;
 
 public class UserService {
-	private List<User> userList = new ArrayList<>(); // replace by database implement, CRUD
 
-	// this method need to switch search database not in-memory access
-	public User findByUsername(String username) {
-		for(User user : userList) {
-			if(user.getUsername() == username) {
-				return user;
-			}
-		}
-		return null;
-	}
-	
-	// register info and store back to  database
-	public boolean registerUser(String name, String password) {
-		if(findByUsername(name) != null) {
-			System.out.println("usernmae have been used");
-			return false;
-		}
-		
-		String hashedPassword = HashUtil.passwordHash(password);
+    // Register info and store back to database
+    public static ErrorMsg registerUser(String name, String password) {
+        if (DatabaseUtil.findByUsername(name) != null) {
+            System.out.println("Username has been used");
+            return ErrorMsg.USER_NAME_BE_USED;
+        }
 
-		User user = new User(name, hashedPassword);
-		userList.add(user);
-		return true;
-		// store back to databases
-	}
-	
-	// once login complete, create a session to the login user
-	public boolean userLogin(String username, String password) {
-		User user = findByUsername(username);
-		
-		if(user != null && HashUtil.checkPassword(password, user.getPassword())) {
-			// enter session part
-			return true;
-		}else if(user == null) {
-			System.out.println("user not exist");
-		}else {
-			System.out.println("password wrong");
-		}		
-		return false;	
-	}
+        String hashedPassword = HashUtil.passwordHash(password);
+        User user = new User(name, hashedPassword);
+        DatabaseUtil.addUser(user);
+        return ErrorMsg.SUCCESS;
+    }
 
+    public static ErrorMsg userLogin(String username, String password) {
+        User user = DatabaseUtil.findByUsername(username);
+        if (user != null && HashUtil.checkPassword(password, user.getPassword())) {
+            // Enter session part
+            return ErrorMsg.SUCCESS;
+        } else if (user == null) {
+            System.out.println("User not exist");
+            return ErrorMsg.USER_NOT_EXIST;
+        } else {
+            System.out.println("Password wrong");
+            return ErrorMsg.PASSWORD_WRONG;
+        }
+    }
+
+    public static boolean changePassword(String newPassword, String oldPassword, String username) {
+        User user = DatabaseUtil.findByUsername(username);
+
+        if (user == null) {
+            System.out.println("User: " + username + " not exist");
+            return false;
+        }
+
+        if (user != null && HashUtil.checkPassword(oldPassword, user.getPassword())) {
+            return DatabaseUtil.updatePassword(username, newPassword);
+        }
+
+        return false;
+    }
+
+    public static boolean changeUsername(String username, String newName) {
+        User user = DatabaseUtil.findByUsername(username);
+
+        if (user == null) {
+            System.out.println("User: " + username + " not exist");
+            return false;
+        }
+
+        if (DatabaseUtil.findByUsername(newName) != null) {
+            System.out.println("Name has been used");
+            return false;
+        } else {
+            return DatabaseUtil.updateUsername(username, newName);
+        }
+    }
 }

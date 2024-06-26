@@ -7,9 +7,9 @@ public class User {
 
 	// init info
 	public User(String username, String password){
-		System.out.println("Enter user name:");
+		System.out.println("user name:" + username);
 		this.username = username;
-		System.out.println("Enter user password:");
+		System.out.println("user password:" + password);
 		this.password = password;
 	}
 

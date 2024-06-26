@@ -1,19 +1,19 @@
 package parameter;
 
-// define command definition, used in ServiceThread class to declare hwo to action
-public enum Command {
+public enum UserCommand {
 	LOGIN,
+	LOGOUT,
 	REGISTRATION,
-	EXIT;
+	SESSION_REFRESH;
 	
 	
 	// handle enum, in case invalid command lead IllegalArgumentException
-	public static Command getEnum(String value) {
+	public static UserCommand getEnum(String value) {
 		if(value == null || value.length() < 1) {
 			return null;
 		}
 		
-		for(Command cmd : values()) {
+		for(UserCommand cmd : values()) {
 			if(cmd.name().equalsIgnoreCase(value)) {
 				return cmd;
 			}
@@ -22,5 +22,4 @@ public enum Command {
 		return null;
 		
 	}
-	
 }
